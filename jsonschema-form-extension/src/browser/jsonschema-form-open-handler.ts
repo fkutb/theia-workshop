@@ -6,7 +6,7 @@ import { EditorManager } from "@theia/editor/lib/browser";
 
 @injectable()
 export class JsonschemaFormOpenHandler extends WidgetOpenHandler<JsonschemaFormWidget> {
-    
+
     readonly id = JsonschemaFormWidget.id;
     readonly label = "Form";
 
@@ -20,11 +20,17 @@ export class JsonschemaFormOpenHandler extends WidgetOpenHandler<JsonschemaFormW
      * A returned value indicating a priority of this handler.
      */
     canHandle(uri: URI): number {
-        return this.editorManager.canHandle(uri) / 2;
+        var path = uri.path;
+        if (path.ext == ".json") {
+            var weight = path.name.endsWith("-data") ? 2 : 0.5;
+            return this.editorManager.canHandle(uri) * weight;
+        } else {
+            return 0;
+        }
     }
 
     protected createWidgetOptions(uri: URI): JsonschemaFormWidgetOptions {
         return { uri: uri.withoutFragment().toString() };
     }
-    
+
 }
