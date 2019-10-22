@@ -1,6 +1,6 @@
 import * as React from "react";
 import { JSONSchema6 } from "json-schema";
-import Form, { IChangeEvent } from "react-jsonschema-form";
+import Form, { IChangeEvent, UiSchema } from "react-jsonschema-form";
 import * as jsoncparser from "jsonc-parser";
 import { MonacoTextModelService } from "@theia/monaco/lib/browser/monaco-text-model-service";
 import { MonacoEditorModel } from "@theia/monaco/lib/browser/monaco-editor-model";
@@ -10,6 +10,7 @@ import { ReferencedModelStorage } from "./referenced-model-storage";
 export class JsonschemaFormView extends React.Component<JsonschemaFormView.Props, JsonschemaFormView.State> {
 
     protected readonly schemaStorage: ReferencedModelStorage<JSONSchema6>;
+    protected readonly uiSchemaStorage: ReferencedModelStorage<UiSchema>;
 
     constructor(props: JsonschemaFormView.Props) {
         super(props);
@@ -17,10 +18,12 @@ export class JsonschemaFormView extends React.Component<JsonschemaFormView.Props
             schema: {
                 default: {}
             },
+            uiSchema: {},
             formData: {}
         }
         const { model, modelService } = props;
         this.schemaStorage = new ReferencedModelStorage(model, modelService, '$schema', { default: {} });
+        this.uiSchemaStorage = new ReferencedModelStorage(model, modelService, '$uiSchema', {});
     }
 
     render(): JSX.Element | null {
@@ -33,9 +36,10 @@ export class JsonschemaFormView extends React.Component<JsonschemaFormView.Props
         //   - Hint: Do it by analogy with `schemaStorage` property.
         //   - List to its changes in `componentWillMount` method and udpate `uiSchema` state accordingly.
         //   - Update the storage whenever the form data model is changed in `reconcileFormData` method.
-        const { schema, formData } = this.state;
+        const { schema, uiSchema, formData } = this.state;
         return <Form
             schema={schema}
+            uiSchema={uiSchema}
             formData={formData}
             onChange={this.submit}>
             <div />
@@ -61,6 +65,8 @@ export class JsonschemaFormView extends React.Component<JsonschemaFormView.Props
     componentWillMount(): void {
         this.toDispose.push(this.schemaStorage);
         this.toDispose.push(this.schemaStorage.onDidChange(schema => this.setState({ schema })));
+        this.toDispose.push(this.uiSchemaStorage);
+        this.toDispose.push(this.uiSchemaStorage.onDidChange(uiSchema => this.setState({ uiSchema })));
 
         this.reconcileFormData();
         this.toDispose.push(this.props.model.onDidChangeContent(() => this.reconcileFormData()));
@@ -76,6 +82,7 @@ export class JsonschemaFormView extends React.Component<JsonschemaFormView.Props
         const formData = jsoncparser.parse(jsoncparser.stripComments(this.props.model.getText())) || {};
         this.setState({ formData });
         this.schemaStorage.update(formData);
+        this.uiSchemaStorage.update(formData);
     }
 
 }
@@ -86,6 +93,7 @@ export namespace JsonschemaFormView {
     }
     export interface State {
         schema: JSONSchema6
+        uiSchema: UiSchema
         formData: any
     }
 }
