@@ -1,11 +1,12 @@
 import * as React from "react";
 
 export interface Greeting {
-    name: string
+    name: string,
+    place: string
 }
 export class GreetingView extends React.Component<Greeting> {
     render(): JSX.Element {
-        return <h1>Hello {this.props.name} at Theia Workshop!</h1>;
+        return <h1>Hello {this.props.name} at {this.props.place}!</h1>;
     }
 }
 
@@ -14,7 +15,8 @@ export class JsonschemaFormView extends React.Component<{}, Greeting> {
     constructor(props: {}) {
         super(props);
         this.state = {
-            name: 'World'
+            name: 'World',
+            place: 'Theia Workshop'
         }
     }
 
@@ -25,8 +27,8 @@ export class JsonschemaFormView extends React.Component<{}, Greeting> {
         // - Add a new property `updateAt` to update the place of greeting state. It should be implemented after `updateName` property.
         // - Render another input field for the place of greeting after the input field for name. Separate them by ` at ` string.
         return <React.Fragment>
-            <GreetingView name={this.state.name} />
-            Greet <input value={this.state.name} onChange={this.updateName} />
+            <GreetingView name={this.state.name} place={this.state.place} />
+            Greet <input value={this.state.name} onChange={this.updateName} /> at <input value={this.state.place} onChange={this.updatePlace} />
         </React.Fragment>;
     }
 
@@ -34,5 +36,7 @@ export class JsonschemaFormView extends React.Component<{}, Greeting> {
         name: e.currentTarget.value
     });
 
+    protected updatePlace = (e: React.ChangeEvent<HTMLInputElement>) => this.setState({
+        place: e.currentTarget.value
+    });
 }
-
