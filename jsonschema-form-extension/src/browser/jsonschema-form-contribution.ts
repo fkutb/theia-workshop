@@ -16,7 +16,7 @@ export class JsonschemaFormCommandContribution implements CommandContribution {
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand(JsonschemaFormCommand, {
-            execute: () => this.messageService.info('Hello World!')
+            execute: () => this.messageService.info('Greetings at EclipseCon 2019!')
         });
     }
 }
